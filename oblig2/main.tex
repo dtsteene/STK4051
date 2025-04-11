@@ -88,6 +88,8 @@
 \begin{document}
 \maketitle
 
+All code is also available on my github:
+https://github.com/dtsteene/STK4051
 \begin{exercise}{1}
     Consider a random vector $\{X_1, \ldots, X_n\}$, where the $X_i$, $i=1, \ldots, n$, are generated from independent exponential distributions with parameter $\theta^{-1}$.
 
@@ -180,24 +182,22 @@
     \item[(d)]
           I did not really understand what we where supposed to do in the nested boostrap approach,
           The natrual thing I guess would be to do the same bias correction that BCa does, so I did that.
-          \inputminted[linenos, breaklines, frame=lines]{python}{ex1d2.py}
+          \inputminted[linenos, breaklines, frame=lines]{python}{ex1d.py}
 
           \begin{tabular}{llllrr}
               \toprule
                 & source          & key          & method                   & CI$_{low}$ & CI$_{high}$ \\
               \midrule
-              0 & bootstrap       & Correct      & Percentile               & 0.700000   & 1.410000    \\
-              1 & bootstrap       & Correct      & BCa                      & 0.640000   & 1.320000    \\
-              2 & bootstrap       & Misspecified & Percentile               & 0.790000   & 1.260000    \\
-              3 & bootstrap       & Misspecified & BCa                      & 0.800000   & 1.250000    \\
-              4 & theoretical     & Correct      & theoretical              & 0.600000   & 1.530000    \\
-              5 & theoretical     & Misspecified & theoretical              & 0.600000   & 1.540000    \\
-              6 & nested boostrap & Correct      & np choice and percentile & 0.600000   & 1.270000    \\
-              7 & nested boostrap & Misspecified & np choice and percentile & 0.240000   & 2.330000    \\
+              0 & theoretical     & Correct      & theoretical              & 0.720000   & 1.740000    \\
+              1 & Nested boostrap & Correct      & np choice and percentile & 0.770000   & 1.590000    \\
+              2 & bootstrap       & Correct      & Percentile               & 0.700000   & 1.510000    \\
+              3 & bootstrap       & Correct      & BCa                      & 0.720000   & 1.540000    \\
+              4 & bootstrap       & Misspecified & Percentile               & 0.790000   & 1.330000    \\
+              5 & bootstrap       & Misspecified & BCa                      & 0.810000   & 1.360000    \\
+              6 & theoretical     & Misspecified & theoretical              & 0.600000   & 1.540000    \\
+              7 & Nested boostrap & Misspecified & np choice and percentile & 1.190000   & 1.530000    \\
               \bottomrule
           \end{tabular}
-
-
 
 \end{enumerate}
 
@@ -348,29 +348,47 @@
               \end{algorithmic}
           \end{algorithm}
 
-    \item [(b) and (c)]
+    \item [(b), (c), (d)]
           I chose to do the Jackiging with bootstrapping method, since it seemd like it would be faster and easier to implement.
           Also I had load the dataset in R and store it. I prefer coding in python...
           \inputminted[linenos, breaklines, frame=lines]{python}{ex2b.py}
           For task (b) the output was:
           \begin{verbatim}
-            Optimal block length (variance): 3
-            Optimal block length (bias): 2
+        Optimal block length for variance of mean: 5
+        Optimal block length for bias of mean: 2
+        Optimal block length for variance of variance: 4
+        Optimal block length for bias of variance: 1
         \end{verbatim}
           \begin{figure}[h]
               \centering
-              \includegraphics[width=1\textwidth]{figs/ex2b.pdf}
+              \includegraphics[width=1\textwidth]{figs/ex2c_block.pdf}
               \caption{The optimal block length $l_{opt}$ for different d.}
               \label{fig:ex2b}
+          \end{figure}
+          \begin{figure}[h]
+              \centering
+              \includegraphics[width=1\textwidth]{figs/ex2c_elm.pdf}
+              \caption{The optimal block length $l_{opt}$ for different d.}
+              \label{fig:ex2b_elm}
           \end{figure}
           \textbf{Expectations on diffrent d values(task (c)):}
           I did not really know what to expect, so ran the experiment first and then thought about it.
 
-          So why is $l_{opt}$ decreasing as $d$ increases for variance in Figure \ref{fig:ex2b}? I guess that deleting fewer blocks (small d) leads to less
+          I don't really see any clear trend in Figure \ref{fig:ex2b}, however when thinking about it I guess that deleting fewer blocks (small d) leads to less
           perturbation and more similar datasets, i.e less variance for the $\tilde{\phi}$, and underestimating
           $\hat V$, this will in turn make $c_1$ larger and thus $l_{opt}$ larger.
-          But it is not as clear for bias and mean.
+          But it is not as clear from my plot, maybee something is wrong. I am a bit confused about the
+          deleting d blocks if it should be blocks or elements. Because of this I ran it again with element
+          deletion, instead of block deletion figure \ref{fig:ex2b_elm}
+          Here this trend is more noticable, and because I think this was not clearly defined in the textbook I'm
+          sticking with this version.
 
+          output from the 1-lag autocorrelation
+          \begin{verbatim}
+        1-lag autocorrelation: 0.2741351888667992
+        Bias of 1-lag autocorrelation: -0.11794491046104215
+        Variance of 1-lag autocorrelation: 0.009513824344844947
+            \end{verbatim}
 \end{enumerate}
 
 \end{document}

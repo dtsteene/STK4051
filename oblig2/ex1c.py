@@ -3,17 +3,20 @@ import matplotlib.pyplot as plt
 
 np.random.seed(2025)
 
-n = 10_000
-theta_0 = 1 #choosing theta_0 = 1
 
+n = 1000   
+B = 10_000    
+theta_0 = 1   
 
-#draw n samples form exponential 
+# Correctly specified: Exponential data
 X = np.random.exponential(theta_0, n)
+
+# Misspecified: Uniform data
 X_misspec = np.random.uniform(0, 2*theta_0, n)
 
-theta_star_non_parametric = np.zeros(n)
-theta_star_non_parametric_misspec = np.zeros(n)
-for i in range(n):
+theta_star_non_parametric = np.zeros(B)
+theta_star_non_parametric_misspec = np.zeros(B)
+for i in range(B):
     X_star = np.random.choice(X, n)
     theta_star_non_parametric[i] = np.mean(X_star)
     
@@ -26,8 +29,8 @@ sigma2_hat = np.var(X)
 theta_hat_misspec = np.mean(X_misspec)
 sigma2_hat_misspec = np.var(X_misspec)
 
-normal_approx = np.random.normal(theta_hat, np.sqrt(sigma2_hat/n), n)
-normal_approx_misspec = np.random.normal(theta_hat_misspec, np.sqrt(sigma2_hat_misspec/n), n)
+normal_approx = np.random.normal(theta_hat, np.sqrt(sigma2_hat/n), B)
+normal_approx_misspec = np.random.normal(theta_hat_misspec, np.sqrt(sigma2_hat_misspec/n), B)
 
 
 ax, fig = plt.subplots(1, 2, figsize=(10, 5))
