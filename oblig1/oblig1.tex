@@ -1,0 +1,144 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath, amsthm, amsfonts, amssymb}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{comment}
+
+\usepackage{hyperref}
+\usepackage{xcolor}
+\hypersetup{ % this is just my personal choice, feel free to change things
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black},
+}
+
+\colorlet{myred}{red!20}
+\colorlet{myblue}{blue!20}
+\colorlet{mypurple}{purple!40}
+\colorlet{myorange}{orange!20}
+\colorlet{myteal}{teal!35}
+
+% 1. Define a ‘breaktheorem’ style that:
+%    - Uses bold for the theorem heading,
+%    - Puts (number + optional note) on the *same line*,
+%    - Forces a line-break before the body text.
+\newtheoremstyle{breaktheorem}%
+{\topsep}{\topsep}%   % Above/below space
+{
+    \addtolength{\@totalleftmargin}{3.5em}
+    \addtolength{\linewidth}{-3.5em}
+    \parshape 1 3.5em \linewidth % chktex 1
+    \itshape
+}% body font
+{}%                   % Indent
+{\bfseries}%          % Head font
+{.}%                  % Punctuation after theorem head
+{\newline}%           % Space (or line break) after theorem head
+{\thmname{#1} \textit{\thmnote{#3}}}
+\makeatother
+%   #1 = Theorem name ("Theorem")
+%   #2 = Theorem number ("4.3")
+%   #3 = The optional note (e.g., "Cea's lemma")
+
+% 2. Tell amsthm to use this style for Theorem.
+\theoremstyle{breaktheorem}
+\newtheorem{theorem}{Theorem}[section]
+
+\newtheoremstyle{exerciseStyle}
+{ } % Space above
+{ } % Space below
+{\normalfont} % Body font
+{ } % Indent amount
+{\bfseries} % Theorem head font
+{ } % Punctuation after theorem head
+{ } % Space after theorem head
+{\thmname{#1}} % Theorem hd spec (can be left empty, meaning `normal`)
+\theoremstyle{exerciseStyle}
+\newtheorem{exercise}{Exercise}[section]
+
+\newtheoremstyle{solutionStyle}
+{ } % Space above
+{ } % Space below
+{\normalfont} % Body font
+{ } % Indent amount
+{\bfseries} % Theorem head font
+{ } % Punctuation after theorem head
+{ } % Space after theorem head
+{\thmname{#1}} % Theorem head spec (can be left empty, meaning `normal`)
+\theoremstyle{solutionStyle}
+\newtheorem{solution}{Solution}[section]
+
+
+\title{Mandatory Assignment 1 STK4051}
+
+\author{Daniel Steeneveldt}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{exercise}
+Recall that for a two-dimensional problem, the Nelder–Mead algorithm
+maintains at each iteration a set of three possible solutions defining the
+vertices of a simplex, specifically a triangle.
+Let us consider whether three is a good choice. Imagine an algorithm
+for two-dimensional optimization that maintains four points defining the
+vertices of a convex quadrilateral and is similar to Nelder–Mead in spirit.
+Speculate how such a procedure could proceed. Consider sketches like those
+shown in Figure 2.10 of Givens $\&$ Hoeting (2013). What are some of the
+inherent challenges?
+\end{exercise}
+
+\begin{solution}
+    
+    Nelder–Mead in 2D organizes its search using three vertices of a a triangle.
+    With three vertices, the reflection, expansions, contractions, or shrink steps support a rough local approximation to a gradient step. 
+ 
+    Below are a few plausible ways to define the reflection and centroid steps for four vertices,
+     and the reasons each approach can fail or becomes difficult. 
+    The conclusion is that quadrilaterals are more complicated than triangles.
+    
+    
+    \subsection*{Naive Extension 1: Reflecting the Worst Point Across the Centroid of the Three Best Vertices}
+    
+    Imagine you have a symetric, convex quadrilateral—none of its interior angles poke inward.
+    When you reflect one corner across the centroid of the other three we get the shape to bend inward - 
+    it becomes non-convex. 
+
+    Non-convex is bad, because we confuse “Inside” vs. “Outside”: When the quadrilateral folds, 
+    it is no longer obvious which part of the region is “inside” the shape. 
+    Expansion and shrinkage is simpler with a convex shape.
+    A folded shape can make these steps contradictory or meaningless—reflections, expansions, or contractions might end up doing weird zig-zags because they rely on a neat polygonal boundary.
+
+    
+    If every reflection risks caving in the shape, you can see how repeated “folds” quickly lead to chaos.
+     The algorithm might jump around and fail to converge in a sensible way.
+    
+    Nelder–Mead works smoothly with triangles (three points) because reflecting one corner across the centroid of the other two keeps the shape a triangle—there’s no extra corner to cause folds. With four vertices in 2D, it is far easier to mangle the shape in a single reflection if we don’t impose more rules or safeguards.
+  
+    \subsection*{Naive Extension 2: Reflecting the Worst Edge Across the Opposite Edge}
+    
+Instead of reflecting just the single worst vertex, one might try to reflect the whole worst edge—that is,
+ the line segment connecting the two vertices with the highest function values. 
+ For instance, label the quadrilateral’s vertices \(x_1\), \(x_2\), \(x_3\), \(x_4\) 
+ so that \(x_3\) and \(x_4\) are the worst, and reflect that edge across the line by \(x_1\) and \(x_2\).  
+Reflecting an edge across the opposite seems more similar to the triangle operation, since we keep
+more of the original shape, and don't risk folding the quadrilateral in to a non-convex shape (I think).
+
+In the triangle setup, the reflection step \emph{directly} sends the shape away from the worst vertex, towards the other two (better) ones. 
+With four vertices, this mirroring does not move direcly away from the worst point.
+This can lead to slower convergence, more cycling behavoiur and getting stuck in suboptimal regions.
+
+To sumarize, the flexibility of the quadrilateral shape can make it harder to define a consistent reflection step that always pushes away from the worst vertex.
+\end{solution}
+    
+
+\end{document}

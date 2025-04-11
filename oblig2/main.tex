@@ -1,0 +1,376 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath, amsthm, amsfonts, amssymb}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{comment}
+\usepackage{minted}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{ % this is just my personal choice, feel free to change things
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black},
+} 
+
+\colorlet{myred}{red!20}
+\colorlet{myblue}{blue!20} 
+\colorlet{mypurple}{purple!40} 
+\colorlet{myorange}{orange!20}
+\colorlet{myteal}{teal!35}
+
+% 1. Define a ‘breaktheorem’ style that:
+%    - Uses bold for the theorem heading,
+%    - Puts (number + optional note) on the *same line*,
+%    - Forces a line-break before the body text.
+\newtheoremstyle{breaktheorem}% 
+{\topsep}{\topsep}%   % Above/below space
+{
+    \addtolength{\@totalleftmargin}{3.5em} 
+    \addtolength{\linewidth}{-3.5em}
+    \parshape 1 3.5em \linewidth % chktex 1
+    \itshape
+}% body font
+{}%                   % Indent
+{\bfseries}%          % Head font
+{.}%                  % Punctuation after theorem head
+{\newline}%           % Space (or line break) after theorem head
+{\thmname{#1} \textit{\thmnote{#3}}}
+\makeatother
+%   #1 = Theorem name ("Theorem")
+%   #2 = Theorem number ("4.3")
+%   #3 = The optional note (e.g., "Cea's lemma")
+
+% 2. Tell amsthm to use this style for Theorem.
+\theoremstyle{breaktheorem}
+\newtheorem{theorem}{Theorem}[section]
+
+\newtheoremstyle{exerciseStyle}
+{ } % Space above
+{ } % Space below
+{\normalfont} % Body font
+{ } % Indent amount
+{\bfseries} % Theorem head font
+{ } % Punctuation after theorem head
+{ } % Space after theorem head
+{\thmname{#1}} % Theorem hd spec (can be left empty, meaning `normal`)
+\theoremstyle{exerciseStyle}
+\newtheorem{exercise}{Exercise}[section]
+
+\newtheoremstyle{solutionStyle}
+{ } % Space above
+{ } % Space below
+{\normalfont} % Body font
+{ } % Indent amount
+{\bfseries} % Theorem head font
+{ } % Punctuation after theorem head
+{ } % Space after theorem head
+{\thmname{#1}} % Theorem head spec (can be left empty, meaning `normal`)
+\theoremstyle{solutionStyle}
+\newtheorem{solution}{Solution}[section]
+
+
+\title{Mandatory Assignment 1 STK4051}
+
+\author{Daniel Steeneveldt}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{exercise}{1}
+    Consider a random vector $\{X_1, \ldots, X_n\}$, where the $X_i$, $i=1, \ldots, n$, are generated from independent exponential distributions with parameter $\theta^{-1}$.
+
+    \begin{enumerate}
+        \item[(a)] Show that the maximum likelihood estimator $\hat{\theta}$ is approximately distributed as
+              \[
+                  N\left(\theta_0, \frac{\theta_0^2}{n}\right)
+              \]
+              when the model is correctly specified, and as
+              \[
+                  N\left(\theta_0, \frac{\sigma_0^2}{n}\right)
+              \]
+              when the model is not correctly specified. Here, $\theta_0$ is the true mean and $\sigma_0^2$ the true variance.
+
+        \item[(b)] Consider the parametric bootstrap estimator $\hat{\theta}^*$. Hjort (1990) states that
+              \[
+                  \hat{\theta}^* \sim \hat{\theta}\frac{\chi^2_{2n}}{2n},
+              \]
+              while the approximate distribution is
+              \[
+                  N\left(\hat{\theta}, \frac{\hat{\theta}^2}{n}\right).
+              \]
+              Show empirically (via simulation) that this is true. What about the situation with the misspecified model?
+
+        \item[(c)] Empirically show that $\hat{\theta}^*$ is approximately distributed as
+              \[
+                  N\left(\hat{\theta}, \frac{\hat{\sigma}^2}{n}\right)
+              \]
+              in the case of the non-parametric bootstrap. Does the model specification/misspecification play any role here? Why?
+
+        \item[(d)] For both points (b) and (c), set $n = 20$ and compare the confidence intervals obtained theoretically with those obtained using the simple percentile method, the BCa approach, and the nested bootstrap approach.
+    \end{enumerate}
+\end{exercise}
+
+\subsection*{Solution 1}
+\begin{enumerate}
+    \item[(a)]
+          Let's first find the MLE.
+          $f(x; \theta) = \frac{1}{\theta} e^{- x/ \theta}$,
+          \begin{align*}
+              L                                     & = \prod \frac{1}{\theta}  e^{- x_i/ \theta} = \theta^{-n} e^{- \frac{1}{\theta} n \bar x}           \\
+              \ell                                  & = -n \log \theta - \frac{1}{\theta} n \bar x                                                        \\
+              \frac{\partial \ell}{\partial \theta} & = -\frac{n}{\theta} + \frac{1}{\theta^2} n \bar x = 0 \Rightarrow \hat{\theta} = \frac{1}{n} \bar x
+          \end{align*}
+          Also I'm not going to show but $\mathbb{E} (X) = \theta_0$, $\text{Var}(X) = \theta_0^2$. For the exponential.
+          From here we can either go through the Fisher information. Since the MLE is distributed asymptotically
+          as $N(\theta_0, \frac{1}{n I(\theta_0})$, with $I(\theta_0) = - \mathbb{E}(\frac{\partial^2 \ell}{\partial \theta} (\theta_0))$
+          \par
+          However, using central limit theorem (CLF) generalizes better to misspecification.
+
+          CLF tels us that the mean of a random variable is distributed as $N(\mu, \frac{\sigma^2}{n})$, as n gets large. Where
+          $\mu$ is the true mean and $\sigma^2$ is the true variance. Thus
+          \[
+              \hat{\theta} \sim N(\theta_0, \frac{\theta_0^2}{n})
+          \]
+          So CLF holds regardless, and that is the case we might me in if the model is misspecified.
+    \item[(b)]
+          \inputminted[linenos, breaklines, frame=lines]{python}{ex1b.py}
+          \begin{figure}[h]
+              \centering
+              \includegraphics[width=1.1\textwidth]{figs/ex1b.pdf}
+              \caption{Histogram of non-parametric bootstrap distribution of $\hat{\theta}^*$
+                  and normal distrobution $N(\hat \theta, \frac{\hat \theta^2}{n})$.
+                  For correctly speficied exponential on the left and misspecified (uniform $[0,2 \theta_0])$ on the right.}
+
+          \end{figure}
+
+          They look pretty similar, and the theoretical orange distro should match equaly well on both, since
+          the bootstrap procedure is the same. The normal distrobution holds because of
+          CLT. I could not see any significat difference when changing the number of samples.
+          \newpage
+    \item[(c)]
+          Code:
+          \inputminted[linenos, breaklines, frame=lines]{python}{ex1c.py}
+
+
+          \begin{figure}[h]
+              \centering
+              \includegraphics[width=1.1\textwidth]{figs/ex1c.pdf}
+              \caption{Histogram of the bootstrap distribution of $\hat{\theta}^*$,
+              the theoretical distribution $\hat \theta \frac{\chi^2_{2n}}{2n} $
+              and normal distrobution $N(\hat \theta, \frac{\hat \sigma^2}{n})$.
+              For correctly speficied exponential on the left and misspecified (uniform $[0,2 \theta_0])$ on the right.
+              The normal and non-parametric boostrap distrobutions of $\hat \theta$.
+              The model specification does not play a role here either, CLT holds regardless.}
+
+          \end{figure}
+
+          \newpage
+    \item[(d)]
+          I did not really understand what we where supposed to do in the nested boostrap approach,
+          The natrual thing I guess would be to do the same bias correction that BCa does, so I did that.
+          \inputminted[linenos, breaklines, frame=lines]{python}{ex1d2.py}
+
+          \begin{tabular}{llllrr}
+              \toprule
+                & source          & key          & method                   & CI$_{low}$ & CI$_{high}$ \\
+              \midrule
+              0 & bootstrap       & Correct      & Percentile               & 0.700000   & 1.410000    \\
+              1 & bootstrap       & Correct      & BCa                      & 0.640000   & 1.320000    \\
+              2 & bootstrap       & Misspecified & Percentile               & 0.790000   & 1.260000    \\
+              3 & bootstrap       & Misspecified & BCa                      & 0.800000   & 1.250000    \\
+              4 & theoretical     & Correct      & theoretical              & 0.600000   & 1.530000    \\
+              5 & theoretical     & Misspecified & theoretical              & 0.600000   & 1.540000    \\
+              6 & nested boostrap & Correct      & np choice and percentile & 0.600000   & 1.270000    \\
+              7 & nested boostrap & Misspecified & np choice and percentile & 0.240000   & 2.330000    \\
+              \bottomrule
+          \end{tabular}
+
+
+
+\end{enumerate}
+
+
+\begin{exercise}{2}
+    Consider the number of ``great'' inventions and scientific discoveries in each year from 1860 to 1959. The data can be found in R (i.e., \texttt{> data(discoveries)}) and come from Delury (1975, pp. 315--318).
+
+    \bigskip
+
+    (a) \quad Describe in broad generality (give the main idea, without entering into the details) the two algorithms provided by the textbook to determine a
+    suitable block length for bootstrapping dependent data (namely,
+    ``subsampling plus bootstrapping'' and ``jackknifing plus bootstrapping''). In particular, highlight where the \emph{subsampling} and the \emph{jackknifing} occur.
+
+    \bigskip
+
+    (b) Choose one of the two algorithms and use it to determine a suitable block length for the time-series of the discoveries dataset.
+
+    \smallskip
+
+    (c) Both algorithms depend on the initial choice of some parameters: using the book notation, $l_0$ and $m$ (or $d$, based on the algorithm you chose). Discuss the possible effect of the choice of these parameters and evaluate it empirically in the discoveries dataset.
+
+    \bigskip
+
+    (d) \quad Estimate the lag-1 autocorrelation of the number of ``great'' inventions and scientific discoveries and compute bias and standard error using a moving block bootstrap with an appropriate blocks-of-blocks strategy.
+
+
+\end{exercise}
+
+\section*{Solution 2}
+
+\begin{enumerate}
+    \item [(a)]
+          Note: I know I was not supposed to enter into the details, but I got a bit carried away, and felt like it helped
+          my understading.
+
+          Both algoritms are for determinign the optial block length $l$ in the block overlapping boostrap for dependent data.
+          Given $n$ datapoints and a block length $l$, we can slide our length $l$ window over our $n$ samples to create
+          a total of $n - l + 1$ different blocks.
+          To create a pseudo dataset, sample $k$ blocks of length $l$ from the original dataset, such that
+          $kl \approx n$. Then calculate the statistic on the pseudo dataset. This procedure is
+          sensitve to the block length $l$, so it needs to be determined.
+          Both strategies ``jackknifing plus bootstrapping'' and ``subsampling plus bootstrapping'' aim to
+          find the $l_opt$ which minimizes the squared error of the boostrap estimator.
+
+          To understand what this means recall that the bootrsap intentds
+          to estimate the variance ($\phi_v$) and bias ($\phi_b$) of a statistic $\hat{\theta}$ - statistics of our statistic.
+          Let's focus on one of them, say $\phi_b$, and try to minimize the squared error of this
+          statistic, that is minimizing
+
+          \begin{equation}
+              \operatorname{MSE} \{ \hat \phi (l)\}  = \mathbb{E} \left( \hat \phi (l) - \phi \right)^2
+              \label{eq:mse}
+          \end{equation}
+
+          Which in itself can be decomposed in to variance and bias, by the given
+          \begin{align}
+              \operatorname{var}\{\hat{\phi}(l)\}  & = \frac{c_1\, l}{n^3} + O\!\Bigl(\frac{l}{n^3}\Bigr)       \label{eq:var}                        \\
+              \operatorname{bias}\{\hat{\phi}(l)\} & = \frac{c_2}{n l} + O\!\Bigl(\frac{1}{n l}\Bigr)            \label{eq:bias}                      \\
+              \operatorname{MSE}\{\hat{\phi}(l)\}  & = \frac{c_1\, l}{n^3} + \frac{c_2^2}{n^2 l^2} + O\!\Bigl(\frac{l}{n^3} + \frac{1}{n^2 l^2}\Bigr)
+          \end{align}
+
+          It is also given in the textbook that one can deduce
+          \begin{equation}
+              l_{opt} \sim \left( \frac{2c^2}{c_1} \right)^{1/3} \cdot n^{1/3}
+              \label{eq:lopt}
+          \end{equation}
+
+          We try to minimize squared loss of our statistic $\hat{\phi}(l)$ with respect to our statistic $l$ under the bootstrap
+          distrobution. Sumsampling with boostrap goes via \eqref{eq:mse} and the jackknifing with bootstrap goes via \eqref{eq:var} and \eqref{eq:bias}.
+
+
+          \textbf{Subsampling with bootstrapping}:
+          Here we start with a pilot block length $l_0$, we calculate the block bootstrap for this block
+          length over the entire dataset and store the result $\hat{\phi}_{l_0}$. This is treated as
+          $\phi$ in \eqref{eq:mse}. Then the subsampling part: choose a subsample size $m$, lagrer than all block lengths we
+          whish to consider. We then create all possible overlapping blocks of size $m$ from the orginal set,
+          and calculate the block bootstrap for each of these blocks for each $l'$ in our searchspace. Then we can get a
+          MSE mesure of each $l'$ from all the $n - m + 1$ subsample sets of size $m$. And we choose optimal
+          $l_{opt}$ as the one with the lowest MSE.  This is dependent on $l_0$ so we can set $l_0 = l_{opt}$
+          and repeat the procedure.
+          \begin{algorithm}[H]
+              \caption{SubsamplingPlusBootstrapping($X, n, B$)}
+              \begin{algorithmic}[1]
+                  \State $l_0 \gets \text{round}(0.05 \cdot n)$ \Comment{Pilot block length}
+                  \State $\hat{\phi}_{l_0} \gets \textsc{BlockBootstrap}(X, l_0, B)$
+                  \State $m \gets \text{round}(0.25 \cdot n)$ \Comment{Subsample size}
+                  \State $\mathcal{S} \gets$ all $n-m+1$ overlapping blocks of $X$ (each of size $m$)
+                  \State $L \gets \{1, 2, \ldots, \lfloor m/2 \rfloor\}$ \Comment{Candidate block lengths}
+                  \For{each $l \in L$}
+                  \State $E(l) \gets 0$
+                  \For{each block $S \in \mathcal{S}$}
+                  \State $\hat{\phi}_{l}(S) \gets \textsc{BlockBootstrap}(S, l, B)$
+                  \State $E(l) \gets E(l) + \Big(\hat{\phi}_{l}(S)-\hat{\phi}_{l_0}\Big)^2$
+                  \EndFor
+                  \State $E(l) \gets E(l) / |\mathcal{S}|$ \Comment{Mean Squared Error for block length $l$}
+                  \EndFor
+                  \State $l^* \gets \arg\min_{l \in L} E(l)$
+                  \State $l_{\text{opt}} \gets \text{round}\left[\left(\frac{n}{m}\right)^{1/3} \cdot l^*\right]$ \Comment{Rescale to full sample size}
+                  \State \Return $l_{\text{opt}}$
+              \end{algorithmic}
+          \end{algorithm}
+
+          \textbf{Jackknifing with bootstrapping}:
+          Here er attempt to approximate the constants $c_1$ and $c_2$ in \eqref{eq:var} and \eqref{eq:bias} and computing an approximation to
+          $l_{opt}$ directly using eqiation \eqref{eq:lopt}. Also some aditional equations are provided for eseitmating bias ($\hat B$) and variance ($\hat V$)
+
+          \begin{equation} \label{eq:9.36}
+              \hat{B} = 2\Bigl(\hat{\phi}(l') - \hat{\phi}(2l')\Bigr)
+          \end{equation}
+
+          % Equation (9.37)
+          \begin{equation} \label{eq:9.37}
+              \hat{V} = \frac{d}{n - l - d + 1} \frac{1}{n - l - d + 2} \sum_{i=1}^{n - l - d + 2} \Bigl(\tilde{\phi}_i - \hat{\phi}\Bigr)^2
+          \end{equation}
+
+          % Equation (9.38)
+          \begin{equation} \label{eq:9.38}
+              \tilde{\phi}_i = \frac{(n - l + 1)\hat{\phi} - (n - l - d - 1)\hat{\phi}_i}{d}.
+          \end{equation}
+
+
+          The algorithm starts with a pilot block length $l_0$ and computes the block bootstrap over the entire set.
+          Then we do jacknifing, similarly to subsampling we get a subset of the data, but now by deleting $d$ an adjacent set of blocks
+          and resample the remainder, for our subset. This can be thought of as sliding a window of size $d$ over the data and deleting
+          the blocks in the window.
+          Then we calculate $\hat{V}$ using \eqref{eq:9.37} and \eqref{eq:9.38}, here the pilot esitmate $\hat{\phi} (l_0)$ is used
+          similar to the subsampling method.
+
+
+
+          \begin{algorithm}[H]
+              \caption{JackknifePlusBootstrapping$(X, n, B)$}
+              \begin{algorithmic}[1]
+                  \State $l_0 \gets \text{round}(n^{1/5})$ \Comment{Pilot block length}
+                  \State $\hat{\phi}_{l_0} \gets \textsc{BlockBootstrap}(X, l_0, B)$ \Comment{Original bootstrap estimate}
+                  \State $\hat{\phi}_{2l_0} \gets \textsc{BlockBootstrap}(X, 2l_0, B)$ \Comment{For bias estimation}
+                  \State $\hat{B} \gets 2 ( \hat{\phi}_{l_0} - \hat{\phi}_{2l_0} )$ \Comment{Bias estimate}
+                  \State $d \gets \text{round}(n^{1/3} l_0^{2/3})$ \Comment{Deletion size}
+                  \For{$i = 1$ to $n - l_0 - d + 2$}
+                  \State $\hat{\phi}_i \gets \textsc{BlockBootstrap\_on\_BlockDeletedDataset}(X, l_0, d, i, B)$ \Comment{Block length $l_0$}
+                  \State $\tilde{\phi}_i \gets \frac{(n - l_0 + 1) \hat{\phi}_{l_0} - (n - l_0 - d - 1) \hat{\phi}_i}{d}$
+                  \EndFor
+                  \State $\hat{V} \gets \frac{d}{n - l_0 - d + 1} \cdot \frac{1}{n - l_0 - d + 2} \sum_{i=1}^{n - l_0 - d + 2} ( \tilde{\phi}_i - \hat{\phi}_{l_0} )^2$
+                  \State $\hat{c}_1 \gets n^3 l_0^{-1} \hat{V}$
+                  \State $\hat{c}_2 \gets n l_0 \hat{B}$
+                  \State $l_{\text{opt}} \gets \text{round} \left( \left( \frac{3 \hat{c}_2}{\hat{c}_1} \right)^{1/3} n^{1/3} \right)$
+                  \State \Return $l_{\text{opt}}$
+              \end{algorithmic}
+          \end{algorithm}
+
+    \item [(b) and (c)]
+          I chose to do the Jackiging with bootstrapping method, since it seemd like it would be faster and easier to implement.
+          Also I had load the dataset in R and store it. I prefer coding in python...
+          \inputminted[linenos, breaklines, frame=lines]{python}{ex2b.py}
+          For task (b) the output was:
+          \begin{verbatim}
+            Optimal block length (variance): 3
+            Optimal block length (bias): 2
+        \end{verbatim}
+          \begin{figure}[h]
+              \centering
+              \includegraphics[width=1\textwidth]{figs/ex2b.pdf}
+              \caption{The optimal block length $l_{opt}$ for different d.}
+              \label{fig:ex2b}
+          \end{figure}
+          \textbf{Expectations on diffrent d values(task (c)):}
+          I did not really know what to expect, so ran the experiment first and then thought about it.
+
+          So why is $l_{opt}$ decreasing as $d$ increases for variance in Figure \ref{fig:ex2b}? I guess that deleting fewer blocks (small d) leads to less
+          perturbation and more similar datasets, i.e less variance for the $\tilde{\phi}$, and underestimating
+          $\hat V$, this will in turn make $c_1$ larger and thus $l_{opt}$ larger.
+          But it is not as clear for bias and mean.
+
+\end{enumerate}
+
+\end{document}
